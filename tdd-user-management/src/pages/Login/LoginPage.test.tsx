@@ -2,11 +2,14 @@ import { LoginPage } from "./LoginPage";
 
 import { screen, render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { QueryClient } from "react-query";
+import { renderWithProviders } from "../../mocks/render-with-providers";
 
 const getSubmitBtn = () => screen.getByRole("button", { name: /submit/i }); // get button submit for reuse in diferents test
 
+
 test("it should render the login", () => {
-  render(<LoginPage />); //Render is a method for render componentet of react with the library
+  renderWithProviders(<LoginPage />)
 
   expect(screen.getByRole("heading", { name: /login/i }));
 });
@@ -21,7 +24,7 @@ test("it should render form elements", () => {
 
 test("it should validate the inputs as required", async () => {
   //La marcamos como asincrono por que estamos esperando un retorno en los datos del form.
-  render(<LoginPage />);
+  renderWithProviders(<LoginPage />)
 
   //submit form
   await userEvent.click(getSubmitBtn()); //User event is a library alternative to fireEvent but better
@@ -35,7 +38,7 @@ test("it should validate the inputs as required", async () => {
 
 test("it should validate the email format ", async () => {
   //this is async because i expetecd a return value with use the findByText
-  render(<LoginPage />);
+  renderWithProviders(<LoginPage />)
 
   await userEvent.type(screen.getByLabelText(/email/i), "invalid email"); //search the event with the invalida email
 
@@ -47,23 +50,21 @@ test("it should validate the email format ", async () => {
   ).toBeInTheDocument();
 });
 
+test.only("it should disable the submit button while is fetching", async () => {
+  renderWithProviders(<LoginPage />)
 
+  expect(getSubmitBtn()).not.toBeDisabled();
 
-test('it should disable the submit button while is fetching', async () => {
-  render(<LoginPage />)
-
-  expect(getSubmitBtn()).not.toBeDisabled()
-
-  await userEvent.type(screen.getByLabelText(/email/i), 'john.doe@mail.com') //user type and click return a await
+  await userEvent.type(screen.getByLabelText(/email/i), "john.doe@mail.com"); //user type and click return a await
   await waitFor(() =>
-    expect(screen.getByLabelText(/email/i)).toHaveValue('john.doe@mail.com'),
-  )
-  userEvent.type(screen.getByLabelText(/password/i), '123456')
+    expect(screen.getByLabelText(/email/i)).toHaveValue("john.doe@mail.com")
+  );
+  userEvent.type(screen.getByLabelText(/password/i), "123456");
   await waitFor(() =>
-    expect(screen.getByLabelText(/password/i)).toHaveValue('123456'),
-  )
+    expect(screen.getByLabelText(/password/i)).toHaveValue("123456")
+  );
 
-  userEvent.click(getSubmitBtn())
+  userEvent.click(getSubmitBtn());
 
-  await waitFor(() => expect(getSubmitBtn()).toBeDisabled()) // awaitfor is a method from testing libray allow us make peticions async like https
-})
+  await waitFor(() => expect(getSubmitBtn()).toBeDisabled()); // awaitfor is a method from testing libray allow us make peticions async like https
+});

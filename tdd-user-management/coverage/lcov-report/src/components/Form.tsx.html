@@ -39,7 +39,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>3/3</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
@@ -113,9 +113,29 @@
 <a name='L48'></a><a href='#L48'>48</a>
 <a name='L49'></a><a href='#L49'>49</a>
 <a name='L50'></a><a href='#L50'>50</a>
-<a name='L51'></a><a href='#L51'>51</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -123,26 +143,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">10x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">9x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">9x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -168,9 +174,9 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { Inputs } from "../types/Login.types";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { loginShema } from "../pages/Login/Login.shema";
+import { useMutation } from "react-query";
 &nbsp;
 import axios from "axios";
-import { useState } from "react";
 &nbsp;
 const loginService = async (email: string, password: string) =&gt; {
   await axios.post("/login", {
@@ -180,17 +186,20 @@ const loginService = async (email: string, password: string) =&gt; {
 };
 &nbsp;
 export const Form = () =&gt; {
-  const [ isLoading, setIsLoading] =useState&lt;boolean&gt;(false)
+&nbsp;
+  const mutation = useMutation(({ email, password }: Inputs) =&gt;
+    loginService(email, password)
+  );
+&nbsp;
   const {
     register,
     handleSubmit,
     formState: { errors }, //descostructed error for formstate
   } = useForm&lt;Inputs&gt;({ resolver: yupResolver(loginShema) }); //invoque resolver with the shema for making validators
 &nbsp;
-  const onSubmit: SubmitHandler&lt;Inputs&gt; = async({email, password}) =&gt; {
-    setIsLoading(true)
-    await loginService(email, password)
-  } //data returns the state of form, remenber assgin submit type to hook form
+  const onSubmit: SubmitHandler&lt;Inputs&gt; = async ({ email, password }) =&gt; {
+    mutation.mutate({ email, password})
+  }; //data returns the state of form, remenber assgin submit type to hook form
 &nbsp;
   return (
     &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
@@ -207,7 +216,7 @@ export const Form = () =&gt; {
         helperText={errors.password?.message}
       /&gt;
 &nbsp;
-      &lt;Button type="submit" variant="contained" disabled={isLoading}&gt;
+      &lt;Button type="submit" variant="contained" disabled={mutation.isLoading}&gt;
         Submit
       &lt;/Button&gt;
     &lt;/form&gt;
@@ -220,7 +229,7 @@ export const Form = () =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-03-17T19:45:04.031Z
+                at 2023-03-17T20:42:35.054Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

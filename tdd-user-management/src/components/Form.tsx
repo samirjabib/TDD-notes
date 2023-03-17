@@ -3,9 +3,9 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { Inputs } from "../types/Login.types";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { loginShema } from "../pages/Login/Login.shema";
+import { useMutation } from "react-query";
 
 import axios from "axios";
-import { useState } from "react";
 
 const loginService = async (email: string, password: string) => {
   await axios.post("/login", {
@@ -15,17 +15,20 @@ const loginService = async (email: string, password: string) => {
 };
 
 export const Form = () => {
-  const [ isLoading, setIsLoading] =useState<boolean>(false)
+
+  const mutation = useMutation(({ email, password }: Inputs) =>
+    loginService(email, password)
+  );
+
   const {
     register,
     handleSubmit,
     formState: { errors }, //descostructed error for formstate
   } = useForm<Inputs>({ resolver: yupResolver(loginShema) }); //invoque resolver with the shema for making validators
 
-  const onSubmit: SubmitHandler<Inputs> = async({email, password}) => {
-    setIsLoading(true)
-    await loginService(email, password)
-  } //data returns the state of form, remenber assgin submit type to hook form
+  const onSubmit: SubmitHandler<Inputs> = async ({ email, password }) => {
+    mutation.mutate({ email, password})
+  }; //data returns the state of form, remenber assgin submit type to hook form
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -42,7 +45,7 @@ export const Form = () => {
         helperText={errors.password?.message}
       />
 
-      <Button type="submit" variant="contained" disabled={isLoading}>
+      <Button type="submit" variant="contained" disabled={mutation.isLoading}>
         Submit
       </Button>
     </form>
