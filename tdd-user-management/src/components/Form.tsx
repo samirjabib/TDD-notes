@@ -1,33 +1,36 @@
-import { TextField, Button } from "@mui/material";
+import { TextField, Button, Typography } from "@mui/material";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Inputs } from "../types/Login.types";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { loginShema } from "../pages/Login/Login.shema";
-import { useLoginMutation } from '../pages/Login/useLoginMutation';
+import { useLoginMutation } from "../pages/Login/useLoginMutation";
 import { StyledLoadder } from "./Loader";
 
-
-
 export const Form = () => {
-
   const {
     register,
     handleSubmit,
     formState: { errors }, //descostructed error for formstate
   } = useForm<Inputs>({ resolver: yupResolver(loginShema) }); //invoque resolver with the shema for making validators
 
-  const mutation = useLoginMutation()
+  const mutation = useLoginMutation();
 
-  const onSubmit: SubmitHandler<Inputs> = async ({email, password }) =>{
-    mutation.mutate({email, password})
-  }
+  const onSubmit: SubmitHandler<Inputs> = async ({ email, password }) => {
+    mutation.mutate({ email, password });
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-    
-    {mutation.isLoading && (
+      {mutation.isLoading && (
         <StyledLoadder role="progressbar" aria-label="loading" />
       )}
+      
+     
+      {mutation.error && (
+        <Typography>Unexpected error, please try again</Typography>
+      )}
+
+
       <TextField
         label="Email"
         {...register("email", { required: true })}

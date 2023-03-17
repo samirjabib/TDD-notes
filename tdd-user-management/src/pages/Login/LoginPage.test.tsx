@@ -3,12 +3,26 @@ import { LoginPage } from "./LoginPage";
 import { screen, render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "../../mocks/render-with-providers";
+import { server } from '../../mocks/server';
+import { rest } from 'msw';
 
 
 //remember tdd is make this fail first, after pass and refactorize code. XD
 
 const getSubmitBtn = () => screen.getByRole("button", { name: /submit/i }); // get button submit for reuse in diferents test
 
+const mockServerWithError = () =>
+  server.use( //Use server create with mock mws
+    rest.post('/login', (req, res, ctx) => res(ctx.delay(1), ctx.status(500))),//simule error 500 
+  )
+
+
+const fillAndSendLoginForm = async () => { //re use login
+    await userEvent.type(screen.getByLabelText(/email/i), 'john.doe@mail.com')
+    await userEvent.type(screen.getByLabelText(/password/i), '123456')
+  
+    await userEvent.click(getSubmitBtn())
+  }
 
 test("it should render the login", () => {
   renderWithProviders(<LoginPage />) //render component by meams props
@@ -71,17 +85,45 @@ test("it should disable the submit button while is fetching", async () => {
 });
 
 
-test.only('it should show a loading indicator while is fetching the login', async () => {
+test('it should show a loading indicator while is fetching the login', async () => {
+
   renderWithProviders(<LoginPage />) //pass component to method  for render with react-query
 
   expect( //use expect method jest for look a match with the dom
     screen.queryByRole('progressbar', {name: /loading/i}), //search loading with query, rol progress bar is a rol for html
   ).not.toBeInTheDocument() // we establish when loading don't this in the DOM.
 
-  await userEvent.type(screen.getByLabelText(/email/i), 'john.doe@mail.com') //wait for labels complete
-  await userEvent.type(screen.getByLabelText(/password/i), '123456')
+  // await userEvent.type(screen.getByLabelText(/email/i), 'john.doe@mail.com') //wait for labels complete
+  // await userEvent.type(screen.getByLabelText(/password/i), '123456')
 
-  await userEvent.click(getSubmitBtn()) //simulate click event with.
+  // await userEvent.click(getSubmitBtn()) //simulate click event with.
+
+  fillAndSendLoginForm()
 
   expect(await screen.findByRole('progressbar', {name: /loading/i})) //when the fetch start we verify that if loading exists
+})
+
+
+test('it should show a loading indicator while is fetching the login', async () => {
+  renderWithProviders(<LoginPage />)
+
+  expect(
+    screen.queryByRole('progressbar', {name: /loading/i}),
+  ).not.toBeInTheDocument()
+
+  await fillAndSendLoginForm()
+
+  expect(await screen.findByRole('progressbar', {name: /loading/i}))
+})
+
+test('it should display "Unexpected error, please try again" when there is an error from the api login', async () => {
+  mockServerWithError() //simulate response error
+
+  renderWithProviders(<LoginPage />)
+
+  await fillAndSendLoginForm() //simulate login
+
+  expect(
+    await screen.findByText('Unexpected error, please try again'),
+  ).toBeInTheDocument() //Search div with the error.
 })
