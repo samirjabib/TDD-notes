@@ -3,22 +3,12 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { Inputs } from "../types/Login.types";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { loginShema } from "../pages/Login/Login.shema";
-import { useMutation } from "react-query";
+import { useLoginMutation } from '../pages/Login/useLoginMutation';
+import { StyledLoadder } from "./Loader";
 
-import axios from "axios";
 
-const loginService = async (email: string, password: string) => {
-  await axios.post("/login", {
-    email,
-    password,
-  });
-};
 
 export const Form = () => {
-
-  const mutation = useMutation(({ email, password }: Inputs) =>
-    loginService(email, password)
-  );
 
   const {
     register,
@@ -26,12 +16,18 @@ export const Form = () => {
     formState: { errors }, //descostructed error for formstate
   } = useForm<Inputs>({ resolver: yupResolver(loginShema) }); //invoque resolver with the shema for making validators
 
-  const onSubmit: SubmitHandler<Inputs> = async ({ email, password }) => {
-    mutation.mutate({ email, password})
-  }; //data returns the state of form, remenber assgin submit type to hook form
+  const mutation = useLoginMutation()
+
+  const onSubmit: SubmitHandler<Inputs> = async ({email, password }) =>{
+    mutation.mutate({email, password})
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
+    
+    {mutation.isLoading && (
+        <StyledLoadder role="progressbar" aria-label="loading" />
+      )}
       <TextField
         label="Email"
         {...register("email", { required: true })}
