@@ -4,6 +4,9 @@ import { screen, render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "../../mocks/render-with-providers";
 
+
+//remember tdd is make this fail first, after pass and refactorize code. XD
+
 const getSubmitBtn = () => screen.getByRole("button", { name: /submit/i }); // get button submit for reuse in diferents test
 
 
@@ -53,11 +56,11 @@ test("it should disable the submit button while is fetching", async () => {
 
   expect(getSubmitBtn()).not.toBeDisabled();
 
-  await userEvent.type(screen.getByLabelText(/email/i), "john.doe@mail.com"); //user type and click return a await
+  await userEvent.type(screen.getByLabelText(/email/i), "john.doe@mail.com"); //user type and click return a await is for actions asyncrounous in this case a one onChange. 
   await waitFor(() =>
-    expect(screen.getByLabelText(/email/i)).toHaveValue("john.doe@mail.com")
+    expect(screen.getByLabelText(/email/i)).toHaveValue("john.doe@mail.com") // simulate a input complete with that value. 
   );
-  userEvent.type(screen.getByLabelText(/password/i), "123456");
+  userEvent.type(screen.getByLabelText(/password/i), "123456"); //get input by label and number in him.
   await waitFor(() =>
     expect(screen.getByLabelText(/password/i)).toHaveValue("123456")
   );
