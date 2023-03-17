@@ -1,10 +1,9 @@
 import { LoginPage } from "./LoginPage";
 
-import { screen, render } from "@testing-library/react";
+import { screen, render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-const getSubmitBtn = () => screen.getByRole('button', { name: /submit/i }) // get button submit for reuse in diferents test
-
+const getSubmitBtn = () => screen.getByRole("button", { name: /submit/i }); // get button submit for reuse in diferents test
 
 test("it should render the login", () => {
   render(<LoginPage />); //Render is a method for render componentet of react with the library
@@ -25,9 +24,9 @@ test("it should validate the inputs as required", async () => {
   render(<LoginPage />);
 
   //submit form
-  userEvent.click(getSubmitBtn()) //User event is a library alternative to fireEvent but better 
+  userEvent.click(getSubmitBtn()); //User event is a library alternative to fireEvent but better
 
-  expect(await screen.findByText(/The email is required/i)).toBeInTheDocument(); //the find method search of async way in the component for this i use async function. 
+  expect(await screen.findByText(/The email is required/i)).toBeInTheDocument(); //the find method search of async way in the component for this i use async function.
   expect(
     await screen.findByText(/The password is required/i)
   ).toBeInTheDocument();
@@ -35,14 +34,36 @@ test("it should validate the inputs as required", async () => {
 });
 
 test("it should validate the email format ", async () => {
-  //La marcamos como asincrono por que estamos esperando un retorno en los datos del form.
+  //this is async because i expetecd a return value with use the findByText
   render(<LoginPage />);
 
-  userEvent.type((screen.getByLabelText(/email/i)), 'invaliid email')  //search the event with the invalida email
+  userEvent.type(screen.getByLabelText(/email/i), "invalid email"); //search the event with the invalida email
 
   //submit form
-  userEvent.click(getSubmitBtn()) //make a click in form XD
+  userEvent.click(getSubmitBtn()); //make a click in form XD
 
-  expect(await screen.findByText(/The email is not valid/i)).toBeInTheDocument();
-
+  expect(
+    await screen.findByText(/The email is not valid/i)
+  ).toBeInTheDocument();
 });
+
+
+
+test.only('it should disable the submit button while is fetching', async () => {
+  render(<LoginPage />)
+
+  expect(getSubmitBtn()).not.toBeDisabled()
+
+  userEvent.type(screen.getByLabelText(/email/i), 'john.doe@mail.com')
+  await waitFor(() =>
+    expect(screen.getByLabelText(/email/i)).toHaveValue('john.doe@mail.com'),
+  )
+  userEvent.type(screen.getByLabelText(/password/i), '123456')
+  await waitFor(() =>
+    expect(screen.getByLabelText(/password/i)).toHaveValue('123456'),
+  )
+
+  userEvent.click(getSubmitBtn())
+
+  await waitFor(() => expect(getSubmitBtn()).toBeDisabled()) // awaitfor is a method from testing libray allow us make peticions async like https
+})
