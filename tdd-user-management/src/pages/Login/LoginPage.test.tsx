@@ -24,7 +24,7 @@ test("it should validate the inputs as required", async () => {
   render(<LoginPage />);
 
   //submit form
-  userEvent.click(getSubmitBtn()); //User event is a library alternative to fireEvent but better
+  await userEvent.click(getSubmitBtn()); //User event is a library alternative to fireEvent but better
 
   expect(await screen.findByText(/The email is required/i)).toBeInTheDocument(); //the find method search of async way in the component for this i use async function.
   expect(
@@ -37,10 +37,10 @@ test("it should validate the email format ", async () => {
   //this is async because i expetecd a return value with use the findByText
   render(<LoginPage />);
 
-  userEvent.type(screen.getByLabelText(/email/i), "invalid email"); //search the event with the invalida email
+  await userEvent.type(screen.getByLabelText(/email/i), "invalid email"); //search the event with the invalida email
 
   //submit form
-  userEvent.click(getSubmitBtn()); //make a click in form XD
+  await userEvent.click(getSubmitBtn()); //make a click in form XD
 
   expect(
     await screen.findByText(/The email is not valid/i)
@@ -49,12 +49,12 @@ test("it should validate the email format ", async () => {
 
 
 
-test.only('it should disable the submit button while is fetching', async () => {
+test('it should disable the submit button while is fetching', async () => {
   render(<LoginPage />)
 
   expect(getSubmitBtn()).not.toBeDisabled()
 
-  userEvent.type(screen.getByLabelText(/email/i), 'john.doe@mail.com')
+  await userEvent.type(screen.getByLabelText(/email/i), 'john.doe@mail.com') //user type and click return a await
   await waitFor(() =>
     expect(screen.getByLabelText(/email/i)).toHaveValue('john.doe@mail.com'),
   )
